@@ -1,0 +1,31 @@
+name: Deploy on heroku
+
+on:
+  workflow_dispatch:
+    inputs:
+      heroku_app:
+        description: 'app name'
+        required: true
+      heroku_api:
+        description: 'heroku api key'
+        required: true
+      heroku_email:
+        description: 'heroku email'     
+      
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+      - uses: akhileshns/heroku-deploy@v3.12.12 # This is the action
+        with:
+          heroku_api_key: ${{github.event.inputs.heroku_api}}
+          heroku_app_name: ${{github.event.inputs.heroku_app}} #Must be unique in Heroku
+          heroku_email: ${{github.event.inputs.heroku_email}}
+          usedocker: true
+          appdir: "app"
+          #healthcheck: "https://akhileshns-hd-test-3.herokuapp.com/"
+          docker_build_args: |
+            MY_VERSION
+        env:
+          MY_VERSION: "1.0"
