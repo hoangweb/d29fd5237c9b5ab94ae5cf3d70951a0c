@@ -1,0 +1,33 @@
+name: do job translate
+
+on:
+  workflow_dispatch:
+    inputs:
+      token:
+        description: 'token'
+        required: true
+      task:
+        description: 'task name'     
+        required: true
+      dburl:
+        description: 'db url'
+        required: true
+      
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - uses: actions/checkout@master
+    
+    - name: docker registry login
+      run: echo "${{  secrets.DOCKER_CONTAINER_REGISTRY_TOKEN }}" | docker login ghcr.io --username admicro --password-stdin
+    
+    - name: Run task
+      if: success()
+      run: |
+        docker run \
+        -e TASK="${{ github.event.inputs.task }}" \
+        -e TOKEN="${{ github.event.inputs.token }}" \
+        -e DB_URL="${{ github.event.inputs.dburl }}" \
+        ghcr.io/admicro/transgui-cli:latest
