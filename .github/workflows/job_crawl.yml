@@ -1,0 +1,30 @@
+name: do job crawl by user
+
+on:
+  workflow_dispatch:
+    inputs:
+      domain:
+        description: 'domain'
+        required: true
+      url:
+        description: 'scan url'
+        required: true
+      db_url:
+        description: 'db url'     
+        required: true
+      
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - uses: actions/checkout@master
+    
+    - name: Run task
+      if: success()
+      run: |
+        docker run \
+        -e DOMAIN="${{ github.event.inputs.domain }}" \
+        -e SCAN_URL="${{ github.event.inputs.url }}" \
+        -e DB_URL="${{ github.event.inputs.db_url }}" \
+        ghcr.io/admicro/ytbcrawlsite:latest
