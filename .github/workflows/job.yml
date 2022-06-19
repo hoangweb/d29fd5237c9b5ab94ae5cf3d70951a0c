@@ -1,0 +1,39 @@
+name: do job by user
+
+on:
+  workflow_dispatch:
+    inputs:
+      token:
+        description: 'token'
+        required: true
+      jobName:
+        description: 'task name'     
+        required: true
+      jobArg1:
+        description: 'job arg 1'
+      jobArg2:
+        description: 'job arg 2'
+      jobArg3:
+        description: 'job arg 3'
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    timeout-minutes: 360
+    steps:
+    - uses: actions/checkout@master
+    
+    - name: docker registry login
+      run: echo "${{  secrets.DOCKER_CONTAINER_REGISTRY_TOKEN }}" | docker login ghcr.io --username admicro --password-stdin
+    
+    - name: Run task
+      if: success()
+      run: |
+        docker run \
+        -e APP_NAME="${{ secrets.APP_NAME }}" \
+        -e APP_TOKEN="${{ github.event.inputs.token }}" \
+        -e JOB_NAME="${{ github.event.inputs.jobName }}" \
+        -e JOB_ARG_1="${{ github.event.inputs.jobArg1 }}" \
+        -e JOB_ARG_2="${{ github.event.inputs.jobArg2 }}" \
+        -e JOB_ARG_3="${{ github.event.inputs.jobArg3 }}" \
+        ghcr.io/admicro/ytbotserver-cli:latest
